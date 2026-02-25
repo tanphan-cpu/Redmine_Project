@@ -60,7 +60,7 @@ export const GanttBar: React.FC<Props> = ({ issue, maxHours = 24 }) => {
             >
                 {/* Layer 1: Estimated Hours (Lighter) */}
                 <div
-                    className={`absolute inset-y-0 left-0 ${estBg} z-10 transition-all duration-700 ease-out border-r border-gray-200/20`}
+                    className={`absolute inset-y-0 left-0 ${estBg} z-10 transition-all duration-700 ease-out`}
                     style={{ width: `${estPercent}%` }}
                 >
                     {est > 0 && estPercent > 15 && (

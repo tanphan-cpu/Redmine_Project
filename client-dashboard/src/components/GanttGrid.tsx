@@ -162,7 +162,7 @@ const GanttRow = React.memo(({ issue, days, isFeature, isCompact, isHovered, onH
                         className={`flex-shrink-0 w-8 h-full flex items-center justify-center relative ${isHovered ? 'bg-blue-50/10' : (isSameDay(day, new Date()) ? 'bg-blue-50/10' : 'group-hover:bg-gray-100/10')}`}
                     >
                         {dayParams && (
-                            <div className={`absolute ${isCompact ? 'h-1.5' : 'h-3'} w-[calc(100%+1px)] ${baseBarClass} ${dayParams.rounded} overflow-hidden z-[5]`} title={`${issue.subject} (${issue.status.name})`}>
+                            <div className={`absolute ${isCompact ? 'h-1.5' : 'h-3'} w-full ${baseBarClass} ${dayParams.rounded} overflow-hidden z-[5]`} title={`${issue.subject} (${issue.status.name})`}>
                                 <div
                                     className={`h-full ${dayParams.color} ${dayParams.progressRounded} transition-all duration-500 relative`}
                                     style={{ width: `${dayParams.fill}%` }}
@@ -195,7 +195,7 @@ function getBarParams(day: Date, start: Date | null, end: Date | null, status: s
 
         let rounded = "";
         if (isSameDay(day, start)) rounded += " rounded-l-full ml-1";
-        if (isSameDay(day, end)) rounded += " rounded-r-full mr-1";
+        if (isSameDay(day, end)) rounded += " rounded-r-full";
 
         // Calculate if this specific day is part of the progress
         // Total days:
