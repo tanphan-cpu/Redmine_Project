@@ -195,7 +195,7 @@ function getBarParams(day: Date, start: Date | null, end: Date | null, status: s
 
         let rounded = "";
         if (isSameDay(day, start)) rounded += " rounded-l-full ml-1";
-        if (isSameDay(day, end)) rounded += " rounded-r-full";
+        if (isSameDay(day, end)) rounded += " rounded-r-md";// rounded-r-md (6px) fix bug soc for Progress bar nhỏ 
 
         // Calculate if this specific day is part of the progress
         // Total days:
