@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback, useTransition } from 'react';
-import { getIssues, getIssueById, getProjects } from './api/redmine';
+import { getIssues, getIssueById, getProjects, getChildIssues } from './api/redmine';
 import type { RedmineProject } from './types';
 import { groupTickets, getPartLabel, type GroupedTicket } from './utils';
 import { TicketRow } from './components/TicketRow';
@@ -128,6 +128,7 @@ function App() {
 
         const featureIds = new Set(issues.map(i => i.id));
         const neededParentIds = new Set<number>();
+        const existingParentIds = new Set<number>();
 
         issues.forEach(issue => {
           if (issue.parent) {
@@ -137,11 +138,33 @@ function App() {
           }
         });
 
+        // Fetch missing parents
         if (neededParentIds.size > 0) {
           const parentPromises = Array.from(neededParentIds).map(id => getIssueById(id));
           const parents = await Promise.all(parentPromises);
           issues.push(...parents);
+          parents.forEach(p => existingParentIds.add(p.id));
         }
+
+        // Find all parent IDs in our issues list (both existing and newly fetched)
+        const allParentIds = new Set<number>();
+        issues.forEach(issue => {
+          // Check if any other issue has this issue as parent
+          const hasChildren = issues.some(i => i.parent?.id === issue.id);
+          if (hasChildren || existingParentIds.has(issue.id)) {
+            allParentIds.add(issue.id);
+          }
+        });
+
+        // Fetch ALL child issues for each parent (to get complete children list)
+        const childPromises = Array.from(allParentIds).map(parentId => getChildIssues(parentId));
+        const childResults = await Promise.all(childPromises);
+        const allChildIssues = childResults.flat();
+
+        // Add child issues that are not already in the list
+        const existingIds = new Set(issues.map(i => i.id));
+        const newChildren = allChildIssues.filter(child => !existingIds.has(child.id));
+        issues.push(...newChildren);
 
         const grouped = groupTickets(issues);
         setRawGroupedTickets(grouped); // Store the raw grouped tickets

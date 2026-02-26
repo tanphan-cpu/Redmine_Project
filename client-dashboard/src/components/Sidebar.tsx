@@ -4,7 +4,6 @@ import {
     ChevronRight,
     ChevronDown,
     Package,
-    Briefcase,
     Zap,
     User,
     Calendar as CalendarIcon
@@ -28,14 +27,6 @@ export const Sidebar: React.FC<Props> = ({ projects, selectedIds, onSelect }) =>
         { label: "RVS 2.0", project: findProject("[2025] RVS2.0 - 표준본") },
     ];
 
-    const projectItems = [
-        { label: "RVS1.5 - 우리카드", project: findProject("RVS1.5 - 우리카드") },
-        { label: "[농협은행] RVS2.0 신규납품", project: findProject("[농협은행] RVS2.0 신규납품") },
-        { label: "[RVS2.0] 2.0.3", project: findProject("[RVS2.0] 2.0.3") },
-        { label: "NTTC", project: findProject("NTTC") },
-        { label: "NTTD", project: findProject("NTTD") },
-    ];
-
     return (
         <div className="w-64 bg-[#1a1c23] text-gray-400 flex flex-col h-full border-r border-gray-800 flex-shrink-0 font-sans shadow-2xl">
             {/* 1. Dashboard */}
@@ -54,17 +45,7 @@ export const Sidebar: React.FC<Props> = ({ projects, selectedIds, onSelect }) =>
                     onSelect={onSelect}
                 />
 
-                {/* 3. Project Menu */}
-                <MenuSection
-                    icon={<Briefcase size={18} />}
-                    label="Project"
-                    items={projectItems}
-                    selectedIds={selectedIds}
-                    onSelect={onSelect}
-                    defaultOpen={true}
-                />
-
-                {/* 4. Sprint (Placeholder) */}
+                {/* 3. Sprint (Placeholder) */}
                 <div className="px-4 py-2 flex items-center gap-3 hover:bg-gray-800/50 cursor-pointer transition-colors group">
                     <Zap size={18} className="group-hover:text-amber-400 transition-colors" />
                     <span className="text-sm font-medium">Sprint</span>

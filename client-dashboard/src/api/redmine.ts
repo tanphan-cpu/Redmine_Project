@@ -38,3 +38,14 @@ export const getIssueById = async (id: number): Promise<RedmineIssue> => {
     return response.data.issue;
 };
 
+export const getChildIssues = async (parentId: number): Promise<RedmineIssue[]> => {
+    // Fetch all child issues of a parent (without date filter)
+    const response = await apiClient.get<{ issues: RedmineIssue[] }>('/issues.json', {
+        params: {
+            parent_id: parentId,
+            limit: 100
+        }
+    });
+    return response.data.issues;
+};
+

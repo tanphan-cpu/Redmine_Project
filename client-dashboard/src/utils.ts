@@ -146,7 +146,9 @@ export const groupTickets = (issues: RedmineIssue[]): GroupedTicket[] => {
     });
 
     return Object.values(groups)
-        .filter(g => g.parts.length > 0 || isFeature(g.feature))
+        // Show feature if it has parts, or it's a standalone feature (no parent), 
+        // or it's a parent ticket that exists in the issue map
+        .filter(g => g.parts.length > 0 || isFeature(g.feature) || issueMap.has(g.feature.id))
         .sort((a, b) => {
             // Priority 1: Created Date (Recent first)
             const dateA = new Date(a.feature.created_on).getTime();
