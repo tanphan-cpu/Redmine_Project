@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Check } from 'lucide-react';
 
 export interface PartFilterState {
@@ -16,12 +16,27 @@ interface Props {
 }
 
 export const PartSelector: React.FC<Props> = ({ filters, onChange, small }) => {
-    const toggleFilter = (key: keyof PartFilterState) => {
-        onChange({
-            ...filters,
-            [key]: !filters[key]
+    // Local state for immediate UI feedback
+    const [localFilters, setLocalFilters] = useState(filters);
+    
+    // Sync with parent when props change
+    useEffect(() => {
+        setLocalFilters(filters);
+    }, [filters]);
+
+    const toggleFilter = useCallback((key: keyof PartFilterState) => {
+        // Update local state immediately for UI feedback
+        const newFilters = {
+            ...localFilters,
+            [key]: !localFilters[key]
+        };
+        setLocalFilters(newFilters);
+        
+        // Notify parent (debounced slightly to prevent rapid-fire)
+        requestAnimationFrame(() => {
+            onChange(newFilters);
         });
-    };
+    }, [localFilters, onChange]);
 
     const options = [
         { key: 'be' as const, label: 'BE' },
@@ -34,7 +49,7 @@ export const PartSelector: React.FC<Props> = ({ filters, onChange, small }) => {
     return (
         <div className="flex items-center gap-4">
             {options.map((option) => {
-                const isSelected = filters[option.key];
+                const isSelected = localFilters[option.key];
                 return (
                     <div
                         key={option.key}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Check } from 'lucide-react';
 
 interface FilterState {
@@ -14,12 +14,27 @@ interface Props {
 }
 
 export const ColumnSelector: React.FC<Props> = ({ filters, onChange, small }) => {
-    const toggleFilter = (key: keyof FilterState) => {
-        onChange({
-            ...filters,
-            [key]: !filters[key]
+    // Local state for immediate UI feedback
+    const [localFilters, setLocalFilters] = useState(filters);
+    
+    // Sync with parent when props change
+    useEffect(() => {
+        setLocalFilters(filters);
+    }, [filters]);
+
+    const toggleFilter = useCallback((key: keyof FilterState) => {
+        // Update local state immediately for UI feedback
+        const newFilters = {
+            ...localFilters,
+            [key]: !localFilters[key]
+        };
+        setLocalFilters(newFilters);
+        
+        // Notify parent
+        requestAnimationFrame(() => {
+            onChange(newFilters);
         });
-    };
+    }, [localFilters, onChange]);
 
     const options = [
         { key: 'pic' as const, label: '담당자(PIC)' },
@@ -30,7 +45,7 @@ export const ColumnSelector: React.FC<Props> = ({ filters, onChange, small }) =>
     return (
         <div className="flex items-center gap-3">
             {options.map((option) => {
-                const isSelected = filters[option.key];
+                const isSelected = localFilters[option.key];
                 return (
                     <div
                         key={option.key}

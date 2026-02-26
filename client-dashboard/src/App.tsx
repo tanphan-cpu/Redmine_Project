@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useMemo, useRef, useCallback, useTransition } from 'react';
 import { getIssues, getIssueById, getProjects } from './api/redmine';
 import type { RedmineProject } from './types';
 import { groupTickets, getPartLabel, type GroupedTicket } from './utils';
@@ -11,6 +11,23 @@ import { ColumnSelector } from './components/ColumnSelector';
 import { PartSelector, type PartFilterState } from './components/PartSelector';
 import { Loader2, Search, User } from 'lucide-react';
 
+// Custom hook for debouncing
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+  
+  return debouncedValue;
+}
+
 function App() {
   const [loading, setLoading] = useState(false);
   const [projects, setProjects] = useState<RedmineProject[]>([]);
@@ -19,6 +36,10 @@ function App() {
   const [rawGroupedTickets, setRawGroupedTickets] = useState<GroupedTicket[]>([]);
   const [searchTicket, setSearchTicket] = useState("");
   const [searchAssignee, setSearchAssignee] = useState("");
+  
+  // Debounced search values for performance
+  const debouncedSearchTicket = useDebounce(searchTicket, 300);
+  const debouncedSearchAssignee = useDebounce(searchAssignee, 300);
   const [hoveredTicketId, setHoveredTicketId] = useState<number | null>(null);
 
   // Resizable panel state
@@ -44,6 +65,22 @@ function App() {
     design: true,
     qa: true,
   });
+  
+  // Use transition for non-urgent updates (filtering)
+  const [, startTransition] = useTransition();
+  
+  const handlePartFilterChange = useCallback((newFilters: PartFilterState) => {
+    // Use transition to keep UI responsive
+    startTransition(() => {
+      setPartFilters(newFilters);
+    });
+  }, []);
+  
+  const handleFilterChange = useCallback((newFilters: { pic: boolean; deadline: boolean; period: boolean }) => {
+    startTransition(() => {
+      setFilters(newFilters);
+    });
+  }, []);
 
   const handleScroll = (source: 'left' | 'right') => (e: React.UIEvent<HTMLDivElement>) => {
     if (isScrolling.current) return;
@@ -119,12 +156,14 @@ function App() {
 
   // 3. Apply Filters via useMemo (Instant)
   const groupedTickets = useMemo(() => {
+    console.time('filter-calculation');
     if (rawGroupedTickets.length === 0) {
+      console.timeEnd('filter-calculation');
       return [];
     }
 
-    const ticketQuery = searchTicket.toLowerCase().trim();
-    const assigneeQuery = searchAssignee.toLowerCase().trim();
+    const ticketQuery = debouncedSearchTicket.toLowerCase().trim();
+    const assigneeQuery = debouncedSearchAssignee.toLowerCase().trim();
 
     return rawGroupedTickets.map(group => {
       // 1. Check if the feature itself matches search criteria
@@ -173,7 +212,8 @@ function App() {
       }
       return null;
     }).filter((g): g is GroupedTicket => g !== null);
-  }, [rawGroupedTickets, partFilters, searchTicket, searchAssignee]);
+    console.timeEnd('filter-calculation');
+  }, [rawGroupedTickets, partFilters, debouncedSearchTicket, debouncedSearchAssignee]);
 
 
   // Resize Handlers
@@ -263,8 +303,8 @@ function App() {
           {/* Row 2: Part Filters + Column Selector - Smaller Font */}
           <div className="flex items-center justify-between w-full text-[11px]">
             <div className="flex items-center gap-4">
-              <PartSelector filters={partFilters} onChange={setPartFilters} small />
-              <ColumnSelector filters={filters} onChange={setFilters} small />
+              <PartSelector filters={partFilters} onChange={handlePartFilterChange} small />
+              <ColumnSelector filters={filters} onChange={handleFilterChange} small />
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import type { RedmineIssue } from '../types';
 import type { GroupedTicket } from '../utils';
 import {
@@ -29,13 +29,18 @@ export const GanttGrid = React.memo(({ groupedTickets, containerRef, onScroll, s
     const internalRef = useRef<HTMLDivElement>(null);
     const scrollContainerRef = containerRef || internalRef;
 
-    // 1. Determine date range: Current Month +/- 6 Months
-    const today = new Date();
-    const startDate = startOfMonth(addMonths(today, -6));
-    const endDate = endOfMonth(addMonths(today, 6));
-
-    const days = eachDayOfInterval({ start: startDate, end: endDate });
-    const months = eachMonthOfInterval({ start: startDate, end: endDate });
+    // 1. Determine date range: Current Month +/- 6 Months (memoized)
+    const today = useMemo(() => new Date(), []);
+    const { startDate, endDate, days, months } = useMemo(() => {
+        const start = startOfMonth(addMonths(today, -6));
+        const end = endOfMonth(addMonths(today, 6));
+        return {
+            startDate: start,
+            endDate: end,
+            days: eachDayOfInterval({ start, end }),
+            months: eachMonthOfInterval({ start, end })
+        };
+    }, [today]);
 
     // 2. Scroll to current day on mount
     useEffect(() => {

@@ -18,6 +18,7 @@ interface Props {
 }
 
 export const TicketRow = React.memo(({ issue, isFeature, isCompact, maxHours, showPic, showDeadline, showPeriod, isHovered, onHover }: Props) => {
+    // Performance optimization: memoize expensive calculations
     const partLabel = getPartLabel(issue);
     const redmineBaseUrl = 'https://projects.rsupport.com';
     const isDefect = issue.tracker.name.includes('결함');
