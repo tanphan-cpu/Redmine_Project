@@ -218,20 +218,24 @@ function App() {
 
       {/* Main Content (Right) */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Header - Vertical Layout - Extreme Compact */}
-        <div className="h-[60px] px-6 py-1 border-b border-gray-200 bg-white shadow-sm z-50 flex flex-col justify-start flex-shrink-0 gap-0">
+        {/* Header - Vertical Layout */}
+        <div className="px-6 py-2 border-b border-gray-200 bg-white shadow-sm z-50 flex flex-col gap-2">
 
-          {/* Row 1: Part Filters & Searches Grouped on the Right */}
-          <div className="flex items-center justify-between w-full h-[28px]">
-            {/* Left: Part Filters */}
-            <div className="flex items-center">
-              <PartSelector filters={partFilters} onChange={setPartFilters} />
+          {/* Row 1: Project Filter (Left) + Searches (Right) */}
+          <div className="flex items-center justify-between w-full">
+            {/* Left: Project Filter - Wider */}
+            <div className="w-[320px]">
+              <ProjectFilter
+                projects={projects}
+                selectedIds={selectedProjectIds}
+                onSelect={setSelectedProjectIds}
+              />
             </div>
 
-            {/* Right: Searches & Project Filter Grouped */}
-            <div className="flex items-center gap-2 h-[28px]">
+            {/* Right: Searches */}
+            <div className="flex items-center gap-2">
               {/* Ticket Search */}
-              <div className="relative w-[180px] h-full">
+              <div className="relative w-[180px]">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
                 <input
                   type="text"
@@ -243,36 +247,30 @@ function App() {
               </div>
 
               {/* Assignee Search */}
-              <div className="relative w-[150px] h-full">
+              <div className="relative w-[150px]">
                 <User className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
                 <input
                   type="text"
-                  className="w-full pl-8 pr-3 py-1 bg-gray-50 border border-gray-300 text-gray-900 text-[13px] rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none h-full"
+                  className="w-full pl-8 pr-3 py-1 bg-gray-50 border border-gray-300 text-gray-900 text-[13px] rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none h-[28px]"
                   placeholder="담당자..."
                   value={searchAssignee}
                   onChange={(e) => setSearchAssignee(e.target.value)}
                 />
               </div>
-
-              {/* Project Search */}
-              <div className="w-[180px] h-full">
-                <ProjectFilter
-                  projects={projects}
-                  selectedIds={selectedProjectIds}
-                  onSelect={setSelectedProjectIds}
-                />
-              </div>
             </div>
           </div>
 
-          {/* Row 2: Column Selector */}
-          <div className="flex items-center gap-4 mt-0">
-            <ColumnSelector filters={filters} onChange={setFilters} />
+          {/* Row 2: Part Filters + Column Selector - Smaller Font */}
+          <div className="flex items-center justify-between w-full text-[11px]">
+            <div className="flex items-center gap-4">
+              <PartSelector filters={partFilters} onChange={setPartFilters} small />
+              <ColumnSelector filters={filters} onChange={setFilters} small />
+            </div>
           </div>
         </div>
 
         {/* Dashboard Workspace - Split View */}
-        <div className={`flex-1 overflow-hidden relative mt-[60px] ${isResizing ? 'cursor-col-resize select-none' : ''} `}>
+        <div className={`flex-1 overflow-hidden relative ${isResizing ? 'cursor-col-resize select-none' : ''} `}>
           {selectedProjectIds.length === 0 ? (
             <div className="w-full h-full flex justify-center items-center text-gray-400">
               Select a project to view dashboard.
